@@ -1,0 +1,182 @@
+@startuml
+title getAllContacts
+
+actor User
+boundary Browser as Br
+box "Phonebook Server" #LightBlue
+control PhoneBookController as Controller
+participant PhoneBookService as Service
+entity ContactDao as Dao
+end box
+database Database as DB
+
+activate Br
+
+User -> Br : open Phone book
+Br -> Controller ++: getAllContacts
+
+note left
+Get method to
+phoneBook/rpc/api/v1/getAllContacts
+end note
+
+Controller -> Service ++: getAllContacts()
+Service -> Dao ++: getAllContacts()
+Dao -> DB ++: data request
+return data response
+return List<Contact>
+return List<Contact>
+return List<ContactDto>
+User <-- Br: display the page
+@enduml
+
+@startuml
+title addContact
+
+actor User
+boundary Browser as Br
+box "Phonebook Server" #LightBlue
+control PhoneBookController as Controller
+participant PhoneBookService as Service
+entity ContactDao as Dao
+end box
+database Database as DB
+
+activate Br
+
+User -> Br : input correct\n contact data
+Br -> Br: check contact data
+Br -> Controller ++: addContact
+
+note left
+POST method to
+phoneBook/rpc/api/v1/addContact
+Body: ContactDto
+end note
+
+Controller -> Service ++: addContact(Contact)
+Service -> Service: validateContact(Contact)
+
+alt validation passed
+    Service -> Dao ++: create(Contact)
+    Dao -> DB --: persist(Contact)
+end
+return contactValidation
+return contactValidation
+Br -> Controller: getAllContacts
+
+note right
+ look getAllContacts diagram
+end note
+
+...
+
+return List<ContactDto>
+User <-- Br: update the page
+|||
+User -> Br: input incorrect\n contact data
+Br -> Br: check contact data
+User <-- Br: show error\n message
+@enduml
+
+@startuml
+title deleteContacts
+
+actor User
+boundary Browser as Br
+box "Phonebook Server" #LightBlue
+    control PhoneBookController as Controller
+    participant PhoneBookService as Service
+    entity ContactDao as Dao
+end box
+database Database as DB
+
+activate Br
+
+User -> Br : delete\n contact\contacts
+Br -> Controller ++: deleteContacts
+
+note left
+Post method to
+phoneBook/rpc/api/v1/deleteContacts
+Body: array with contacts IDs
+end note
+
+Controller -> Service ++: deleteContacts(contactsIds)
+loop contactsIds.length times
+    Service -> Dao ++: deleteById()
+    Dao -> DB --: update contact
+
+    note left: marked as deleted
+end
+return DeleteResults
+return DeleteResults
+Br -> Controller: getAllContacts
+
+note right
+ look getAllContacts diagram
+end note
+
+...
+
+return List<ContactDto>
+User <-- Br: update page
+@enduml
+
+@startuml
+title getFilteredContacts
+
+actor User
+boundary Browser as Br
+box "Phonebook Server" #LightBlue
+control PhoneBookController as Controller
+participant PhoneBookService as Service
+entity ContactDao as Dao
+end box
+database Database as DB
+
+activate Br
+
+User -> Br : input filter\n push "Search"
+Br -> Br: check for empty filter
+
+alt Empty filter
+User <- Br: trim search field
+note left: don't do request
+else Filter not empty
+Br -> Controller ++: getFilteredContacts
+
+note left
+Post method to
+phoneBook/rpc/api/v1/getFilteredContacts
+Body: Filter
+end note
+
+Controller -> Service ++: getFilteredContacts(Filter)
+Service -> Dao ++: findContactContainingString(String)
+Dao -> DB ++: data request
+return data response
+return List<Contact>
+return List<Contact>
+return List<ContactDto>
+User <-- Br: update page
+end
+@enduml
+
+@startuml
+title SchedulerClass
+
+participant DeleteContactScheduler as Scheduler
+participant PhoneBookService as Service
+entity ContactDao as Dao
+database Database as DB
+
+loop every "delay" milliseconds
+    Scheduler -> Service ++: deleteAnyContact()
+    Service -> Dao --++: deleteAnyContact()
+    Dao -> Dao: choose random contact
+    Dao -> DB --: update contact
+
+    note left: marked as deleted
+end
+@enduml
