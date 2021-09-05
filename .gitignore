@@ -14,6 +14,8 @@ target/
 .sts4-cache
 
 ### IntelliJ IDEA ###
+!.idea/runConfigurations/
+!.idea/runConfigurations.xml
 .idea
 *.iws
 *.iml
@@ -32,5 +34,3 @@ build/
 ### VS Code ###
 .vscode/
 /logs/
-!/.idea/runConfigurations.xml
-!/.idea/runConfigurations
