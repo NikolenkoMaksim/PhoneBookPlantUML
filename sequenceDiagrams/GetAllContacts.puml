@@ -1,0 +1,31 @@
+@startuml
+title getAllContacts
+
+actor User
+boundary Browser as Br
+box "Phonebook Server" #LightBlue
+control PhoneBookController as Controller
+participant PhoneBookService as Service
+entity ContactDao as Dao
+end box
+database Database as DB
+
+activate Br
+
+User -> Br : open Phone book
+Br -> Controller ++: getAllContacts
+
+note left
+Get method to
+phoneBook/rpc/api/v1/getAllContacts
+end note
+
+Controller -> Service ++: getAllContacts()
+Service -> Dao ++: getAllContacts()
+Dao -> DB ++: data request
+return data response
+return List<Contact>
+return List<Contact>
+return List<ContactDto>
+User <-- Br: display the page
+@enduml

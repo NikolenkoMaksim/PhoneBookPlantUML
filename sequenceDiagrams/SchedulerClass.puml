@@ -1,0 +1,17 @@
+@startuml
+title SchedulerClass
+
+participant DeleteContactScheduler as Scheduler
+participant PhoneBookService as Service
+entity ContactDao as Dao
+database Database as DB
+
+loop every "delay" milliseconds
+    Scheduler -> Service ++: deleteAnyContact()
+    Service -> Dao --++: deleteAnyContact()
+    Dao -> Dao: choose random contact
+    Dao -> DB --: update contact
+
+    note left: marked as deleted
+end
+@enduml

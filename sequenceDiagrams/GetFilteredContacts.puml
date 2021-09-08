@@ -1,0 +1,39 @@
+@startuml
+title getFilteredContacts
+
+actor User
+boundary Browser as Br
+box "Phonebook Server" #LightBlue
+control PhoneBookController as Controller
+participant PhoneBookService as Service
+entity ContactDao as Dao
+end box
+database Database as DB
+
+activate Br
+
+User -> Br : input filter\n push "Search"
+Br -> Br: check for empty filter
+
+alt Empty filter
+User <- Br: trim search field
+note left: don't do request
+else Filter not empty
+Br -> Controller ++: getFilteredContacts
+
+note left
+Post method to
+phoneBook/rpc/api/v1/getFilteredContacts
+Body: Filter
+end note
+
+Controller -> Service ++: getFilteredContacts(Filter)
+Service -> Dao ++: findContactContainingString(String)
+Dao -> DB ++: data request
+return data response
+return List<Contact>
+return List<Contact>
+return List<ContactDto>
+User <-- Br: update page
+end
+@enduml

@@ -1,0 +1,48 @@
+@startuml
+title addContact
+
+actor User
+boundary Browser as Br
+box "Phonebook Server" #LightBlue
+control PhoneBookController as Controller
+participant PhoneBookService as Service
+entity ContactDao as Dao
+end box
+database Database as DB
+
+activate Br
+
+User -> Br : input correct\n contact data
+Br -> Br: check contact data
+Br -> Controller ++: addContact
+
+note left
+POST method to
+phoneBook/rpc/api/v1/addContact
+Body: ContactDto
+end note
+
+Controller -> Service ++: addContact(Contact)
+Service -> Service: validateContact(Contact)
+
+alt validation passed
+    Service -> Dao ++: create(Contact)
+    Dao -> DB --: persist(Contact)
+end
+return contactValidation
+return contactValidation
+Br -> Controller: getAllContacts
+
+note right
+ look getAllContacts diagram
+end note
+
+...
+
+return List<ContactDto>
+User <-- Br: update the page
+|||
+User -> Br: input incorrect\n contact data
+Br -> Br: check contact data
+User <-- Br: show error\n message
+@enduml

@@ -1,0 +1,43 @@
+@startuml
+title deleteContacts
+
+actor User
+boundary Browser as Br
+box "Phonebook Server" #LightBlue
+    control PhoneBookController as Controller
+    participant PhoneBookService as Service
+    entity ContactDao as Dao
+end box
+database Database as DB
+
+activate Br
+
+User -> Br : delete\n contact\contacts
+Br -> Controller ++: deleteContacts
+
+note left
+Post method to
+phoneBook/rpc/api/v1/deleteContacts
+Body: array with contacts IDs
+end note
+
+Controller -> Service ++: deleteContacts(contactsIds)
+loop contactsIds.length times
+    Service -> Dao ++: deleteById()
+    Dao -> DB --: update contact
+
+    note left: marked as deleted
+end
+return DeleteResults
+return DeleteResults
+Br -> Controller: getAllContacts
+
+note right
+ look getAllContacts diagram
+end note
+
+...
+
+return List<ContactDto>
+User <-- Br: update page
+@enduml
